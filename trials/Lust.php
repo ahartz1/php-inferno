@@ -227,9 +227,9 @@ class Lust
 		}
 		while(prev($a) !== false);
 
-		assert_that($b)->is_equal_to(__);
+		assert_that($b)->is_equal_to(array('paolo', 'loves', 'francesca'));
 
-		task('consider why is this a bad idea');
+		// task('consider why is this a bad idea');
 	}
 
 	/**

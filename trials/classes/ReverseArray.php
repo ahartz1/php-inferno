@@ -27,15 +27,17 @@ class ReverseArray implements ArrayAccess
 	public function offsetGet($offset)
 	{
 		// implement me!
+		return $this->internal_array[$this->start_index - $offset];
 
-		throw new BadMethodCallException('implement this method');
+		// throw new BadMethodCallException('implement this method');
 	}
 
 	public function offsetSet($offset, $value)
 	{
 		// implement me!
+		$this->internal_array[$this->start_index - $offset] = $value;
 		
-		throw new BadMethodCallException('implement this method');
+		// throw new BadMethodCallException('implement this method');
 	}
 
 	public function offsetUnset($offset)
