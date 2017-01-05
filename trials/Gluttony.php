@@ -66,7 +66,7 @@ class Gluttony
 		assert_that($words)->is_equal_to('hog and pig and glutton');
 
 		// a quirk of implode
-		assert_that(implode(['hog', 'pig', 'glutton'], ' and ') == $words)->is_equal_to('and  hog');
+		assert_that(implode(['hog', 'pig', 'glutton'], ' and ') == $words)->is_equal_to(true);
 	}
 
 	public function __and_tear_them_down__()
@@ -182,20 +182,12 @@ class Gluttony
 			return array();
 		}
 
-		// Check if we have comma-separated items
+		// Get an array of items with no commas
 		$no_commas = explode(', ', $mouth_contents);
-		if (!$no_commas) {
-			$no_commas = array($mouth_contents);
-		}
 
 		// Check if there are any ' and '-separated items
 		$no_commas_or_ands = array();
 		foreach ($no_commas as $match) {
-			// If we don't have an ' and ' in the string, just add it and move on
-			if (strpos(' and ', $match) === 0) {
-				$no_commas_or_ands[] = $match;
-				continue;
-			}
 			$no_and = explode(' and ', $match);
 			$no_commas_or_ands = array_merge($no_commas_or_ands, $no_and);
 		}
