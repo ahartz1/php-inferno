@@ -183,12 +183,19 @@ class Gluttony
 		}
 
 		// Get an array of items with no commas
-		$no_commas = explode(', ', $mouth_contents);
+		$no_commas = explode(',', $mouth_contents);
 
 		// Check if there are any ' and '-separated items
 		$no_commas_or_ands = array();
 		foreach ($no_commas as $match) {
-			$no_and = explode(' and ', $match);
+			$rawMatches = explode(' and ', $match);
+			$no_and = array();
+			foreach ($rawMatches as $rawMatch) {
+				if (trim($rawMatch)) {
+					$no_and[] = trim($rawMatch);
+				}
+			}
+
 			$no_commas_or_ands = array_merge($no_commas_or_ands, $no_and);
 		}
 
@@ -217,6 +224,12 @@ class Gluttony
 		
 		assert_that($this->whats_in_the_mouths_of_cerberus('mud and honey cake, bones and honey cake'))
 			->is_equal_to(['mud', 'honey cake', 'bones']);
+	}
+	
+	public function why_do_you_have_a_honey_cake_with_oxford_comma_boy()
+	{
+		assert_that($this->whats_in_the_mouths_of_cerberus('mud, bones, and honey cake'))
+			->is_equal_to(['mud', 'bones', 'honey cake']);
 	}
 	
 	public function oh_hes_asleep_now()
