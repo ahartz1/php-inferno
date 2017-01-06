@@ -21,6 +21,8 @@ class SalesHierarchy
 	*/
 	public static function build($sales_hierarchy_string)
 	{
+		$nodes = explode('}', $sales_hierarchy_string);
+
 		// implement me!
 		throw new BadMethodCallException('implement this method');
 	}
@@ -135,9 +137,35 @@ abstract class Salesperson
 
 	public function get_best_sales_rep(Lead $lead, Salesperson $winner_so_far = null)
 	{
-		// implement me!
+		// Check if we are better than any thus far
+		if (is_null($this->current_lead) && $this->can_take_lead($lead)) {
+			if (empty($winner_so_far)
+				|| ($winner_so_far->success_rate() < $this->success_rate())) {
+			$winner_so_far = $this;
+			}
+		}
 
-		throw new BadMethodCallException('implement this method');
+		// Check our subordinates
+		$leftBest = null;
+		if ($this->left) {
+			$leftBest = $this->left->get_best_sales_rep($lead, $winner_so_far);
+		}
+		$rightBest = null;
+		if ($this->right) {
+			$rightBest = $this->right->get_best_sales_rep($lead, $winner_so_far);
+		}
+
+		// Compare the subordinates' results
+		if ($leftBest) {
+			if ($rightBest
+				&& ($leftBest->success_rate() < $rightBest->success_rate())) {
+				$winner_so_far = $rightBest;
+			} else {
+				$winner_so_far = $leftBest;
+			}
+		}
+
+		return $winner_so_far;
 	}
 
 	/**
@@ -176,8 +204,12 @@ class Sociopath extends Salesperson
 {
 	public function success_rate()
 	{
-		// implement me!
-		throw new BadMethodCallException('implement this method');
+		return 0.85;
+	}
+
+	protected function can_take_lead(Lead $lead)
+	{
+		return $lead->value() >= 1000000;
 	}
 }
 
@@ -185,11 +217,12 @@ class Clueless extends Salesperson
 {
 	public function success_rate()
 	{
-		// implement me!
-
-		// tip: use the is_a function
-
-		throw new BadMethodCallException('implement this method');
+		if (is_a($this->parent, 'Sociopath')) {
+			$rate = 0.65;
+		} else {
+			$rate = 0.45;
+		}
+		return $rate;
 	}
 }
 
@@ -197,8 +230,12 @@ class Loser extends Salesperson
 {
 	public function success_rate()
 	{
-		// implement me!
-		throw new BadMethodCallException('implement this method');
+		if (is_a($this->parent, 'Loser')) {
+			$rate = $this->parent->success_rate() / 2;
+		} else {
+			$rate = 0.02;
+		}
+		return $rate;
 	}
 }
 
