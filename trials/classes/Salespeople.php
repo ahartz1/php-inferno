@@ -21,10 +21,48 @@ class SalesHierarchy
 	*/
 	public static function build($sales_hierarchy_string)
 	{
-		$nodes = explode('}', $sales_hierarchy_string);
+		// Break into elements of the form 0{Name|Class
+		$nodesStrings = explode('}', $sales_hierarchy_string);
 
-		// implement me!
-		throw new BadMethodCallException('implement this method');
+		// Add the nodes to the hierarchy
+		$teamLead    = null;
+		$currentNode = null;
+		foreach ($nodesStrings as $index => $nodeString) {
+			$nodeData = self::getNodeData($nodeString);
+			if (empty($nodeData)) {
+				continue;
+			}
+
+			$newSalesperson = new $nodeData['class']();
+			if ($index === 0) {
+				$teamLead    = $newSalesperson;
+				$currentNode = $newSalesperson;
+				continue;
+			}
+			// TODO: method to populate other nodes
+		}
+		return new SalesHierarchy($teamLead);
+	}
+
+	/**
+	 * Parse the node string into an array.
+	 *
+	 * @param string $nodeString A string of the form '0{Name|Class'
+	 *
+	 * @return array An array whose keys correspond to the data
+	 */
+	protected static function getNodeData($nodeString) {
+		if (empty($nodeString)) {
+			return array();
+		}
+
+		$step1 = explode('{', $nodeString);
+		$step2 = explode('|', $step1[1]);
+
+		return array(
+			'method' => $step1[0],
+			'class'  => $step2[1],
+			);
 	}
 
 	/**
