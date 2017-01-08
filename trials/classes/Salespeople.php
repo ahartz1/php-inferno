@@ -2,7 +2,7 @@
 
 /**
 * Things to implement in this file:
-* - SalesHiearchy::build()
+* - SalesHierarchy::build()
 * - Salesperson::get_best_sales_rep()
 * - The success_rate() method in each Salesperson subclass
 */
@@ -22,26 +22,53 @@ class SalesHierarchy
 	public static function build($sales_hierarchy_string)
 	{
 		// Break into elements of the form 0{Name|Class
-		$nodesStrings = explode('}', $sales_hierarchy_string);
+		$nodeStrings = explode('}', $sales_hierarchy_string);
+
+		/** @var Salesperson $currentNode */
+		$currentNode = null;
 
 		// Add the nodes to the hierarchy
-		$teamLead    = null;
-		$currentNode = null;
-		foreach ($nodesStrings as $index => $nodeString) {
-			$nodeData = self::getNodeData($nodeString);
+		foreach ($nodeStrings as $nodeString) {
+			$nodeData = static::getNodeData($nodeString);
 			if (empty($nodeData)) {
 				continue;
 			}
 
+			/** @var Salesperson $newSalesperson */
 			$newSalesperson = new $nodeData['class']();
-			if ($index === 0) {
-				$teamLead    = $newSalesperson;
+			echo "New Salesperson Created: ".get_class($newSalesperson)."\n";
+
+			// If this is the first one, don't attempt to place in tree
+			if (empty($currentNode)) {
 				$currentNode = $newSalesperson;
 				continue;
 			}
-			// TODO: method to populate other nodes
+
+			// Place the new Salesperson in the hierarchy
+			if ($nodeData['method'] === 0) {
+				$currentNode->set_left($newSalesperson);
+			} else {
+				// Determine location to add node
+				$parentNode = static::getNodeLocation($currentNode);
+
+				// If no current node, then we're done building
+				if (!$parentNode) {
+					break;
+				}
+
+				$parentNode->set_right($newSalesperson);
+			}
+
+			// Update the current node
+			$currentNode = $newSalesperson;
+
 		}
-		return new SalesHierarchy($teamLead);
+
+		// Determine root
+		while ($currentNode->parent()) {
+			$currentNode = $currentNode->parent();
+		}
+		return new SalesHierarchy($currentNode);
 	}
 
 	/**
@@ -63,6 +90,30 @@ class SalesHierarchy
 			'method' => $step1[0],
 			'class'  => $step2[1],
 			);
+	}
+
+	/**
+	* Determine the parent to which this node should be added.
+	*
+	* @param Salesperson $currentNode The last node added to the tree
+	*
+	* @return Salesperson|bool
+	*/
+	protected static function getNodeLocation($currentNode) {
+		// Before we get started, just make sure there is a parent
+		if (!$currentNode->parent()) {
+			return false;
+		}
+
+		while (true) {
+			$currentNode = $currentNode->parent();
+			if (!$currentNode->right()) {
+				return $currentNode;
+			}
+			if (!$currentNode->parent()) {
+				return false;
+			}
+		}
 	}
 
 	/**
@@ -105,6 +156,14 @@ class SalesHierarchy
 abstract class Salesperson
 {
 	/**
+	 * For testing purposes, print yourself and your left/right
+	 */
+	public function echo_tree() {
+		echo "Self: ".get_class($this).", Left: ".get_class($this->left).", Right: ".get_class($this->right)."\n\n";
+	}
+
+
+	/**
 	* @var Salesperson - the direct manager of this Salesperson
 	*/
 	protected $parent = null;
@@ -120,7 +179,7 @@ abstract class Salesperson
 	protected $left = null;
 
 	/**
-	* @var Salesperson - the current sales lead this Salesperson is working on
+	* @var Lead - the current sales lead this Salesperson is working on
 	* (note: this is a potential deal for the company, not the person's manager)
 	*/
 	private $current_lead = null;
@@ -143,11 +202,13 @@ abstract class Salesperson
 	public function set_right(Salesperson $person)
 	{
 		$this->right = $person;
+		$person->set_parent($this);
 	}
 
 	public function set_left(Salesperson $person)
 	{
 		$this->left = $person;
+		$person->set_parent($this);
 	}
 
 	public function set_parent(Salesperson $person)
@@ -168,38 +229,39 @@ abstract class Salesperson
 
 	protected function can_take_lead(Lead $lead)
 	{
-		// tip: you may want to override this function in one of the subclasses.
-		
-		return true;
+		if (empty($this->current_lead)) {
+			return true;
+		}
+
+		return false;
 	}
 
 	public function get_best_sales_rep(Lead $lead, Salesperson $winner_so_far = null)
 	{
 		// Check if we are better than any thus far
-		if (is_null($this->current_lead) && $this->can_take_lead($lead)) {
-			if (empty($winner_so_far)
-				|| ($winner_so_far->success_rate() < $this->success_rate())) {
+		if (empty($winner_so_far) && $this->can_take_lead($lead)) {
 			$winner_so_far = $this;
+		} elseif ($winner_so_far && $this->can_take_lead($lead)) {
+			if ($winner_so_far->success_rate() < $this->success_rate()) {
+				$winner_so_far = $this;
 			}
 		}
 
 		// Check our subordinates
-		$leftBest = null;
 		if ($this->left) {
 			$leftBest = $this->left->get_best_sales_rep($lead, $winner_so_far);
+			if ($winner_so_far && $leftBest->success_rate() > $winner_so_far->success_rate()) {
+				$winner_so_far = $leftBest;
+			} elseif (empty($winner_so_far)) {
+				$winner_so_far = $leftBest;
+			}
 		}
-		$rightBest = null;
 		if ($this->right) {
 			$rightBest = $this->right->get_best_sales_rep($lead, $winner_so_far);
-		}
-
-		// Compare the subordinates' results
-		if ($leftBest) {
-			if ($rightBest
-				&& ($leftBest->success_rate() < $rightBest->success_rate())) {
+			if ($winner_so_far && $rightBest->success_rate() > $winner_so_far->success_rate()) {
 				$winner_so_far = $rightBest;
-			} else {
-				$winner_so_far = $leftBest;
+			} else if (empty($winner_so_far)) {
+				$winner_so_far = $rightBest;
 			}
 		}
 
@@ -247,7 +309,11 @@ class Sociopath extends Salesperson
 
 	protected function can_take_lead(Lead $lead)
 	{
-		return $lead->value() >= 1000000;
+		if (empty($this->current_lead)) {
+			// Lead must be $1,000,000 or more!
+			return $lead->value() >= 1000000;
+		}
+		return false;
 	}
 }
 
