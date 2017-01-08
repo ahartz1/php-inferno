@@ -26,6 +26,7 @@ class SalesHierarchy
 
 		/** @var Salesperson $currentNode */
 		$currentNode = null;
+		$nextMethod  = null;
 
 		// Add the nodes to the hierarchy
 		foreach ($nodeStrings as $nodeString) {
@@ -33,34 +34,38 @@ class SalesHierarchy
 			if (empty($nodeData)) {
 				continue;
 			}
-
+			
 			/** @var Salesperson $newSalesperson */
 			$newSalesperson = new $nodeData['class']();
-			echo "New Salesperson Created: ".get_class($newSalesperson)."\n";
 
 			// If this is the first one, don't attempt to place in tree
-			if (empty($currentNode)) {
+			if (is_null($nextMethod)) {
+				// Update the current node
 				$currentNode = $newSalesperson;
+
+				// Update where we are going to add the next node
+				$nextMethod = $nodeData['method'];
 				continue;
 			}
 
 			// Place the new Salesperson in the hierarchy
-			if ($nodeData['method'] === 0) {
+			if ($nextMethod == '0') {
 				$currentNode->set_left($newSalesperson);
 			} else {
-				// Determine location to add node
-				$parentNode = static::getNodeLocation($currentNode);
+				// Add node to tree
+				$addedToTree = static::setNodeLocation($currentNode, $newSalesperson);
 
-				// If no current node, then we're done building
-				if (!$parentNode) {
+				// If we couldn't add them, then we're done building
+				if (!$addedToTree) {
 					break;
 				}
-
-				$parentNode->set_right($newSalesperson);
 			}
 
 			// Update the current node
 			$currentNode = $newSalesperson;
+			
+			// Update where we are going to add the next node
+			$nextMethod = $nodeData['method'];
 
 		}
 
@@ -95,24 +100,29 @@ class SalesHierarchy
 	/**
 	* Determine the parent to which this node should be added.
 	*
-	* @param Salesperson $currentNode The last node added to the tree
+	* @param Salesperson $currentNode    The last node added to the tree
+	* @param Salesperson $newSalesperson The Salesperson to add
 	*
 	* @return Salesperson|bool
 	*/
-	protected static function getNodeLocation($currentNode) {
-		// Before we get started, just make sure there is a parent
-		if (!$currentNode->parent()) {
+	protected static function setNodeLocation(&$currentNode, &$newSalesperson) {
+		// We cannot add above the root
+		if (empty($currentNode->parent())) {
 			return false;
 		}
 
 		while (true) {
+			// Pop up to next parent
 			$currentNode = $currentNode->parent();
-			if (!$currentNode->right()) {
-				return $currentNode;
+			if ($currentNode->right()) {
+				// If the right is full and there is no parent, we are done
+				if (empty($currentNode->parent())) {
+					return false;
+				}
+				continue;
 			}
-			if (!$currentNode->parent()) {
-				return false;
-			}
+			$currentNode->set_right($newSalesperson);
+			return true;
 		}
 	}
 
@@ -160,6 +170,12 @@ abstract class Salesperson
 	 */
 	public function echo_tree() {
 		echo "Self: ".get_class($this).", Left: ".get_class($this->left).", Right: ".get_class($this->right)."\n\n";
+		if ($this->left) {
+			$this->left->echo_tree();
+		}
+		if ($this->right) {
+			$this->right->echo_tree();
+		}
 	}
 
 
@@ -321,7 +337,7 @@ class Clueless extends Salesperson
 {
 	public function success_rate()
 	{
-		if (is_a($this->parent, 'Sociopath')) {
+		if ($this->parent && get_class($this->parent) == 'Sociopath') {
 			$rate = 0.65;
 		} else {
 			$rate = 0.45;
@@ -334,7 +350,7 @@ class Loser extends Salesperson
 {
 	public function success_rate()
 	{
-		if (is_a($this->parent, 'Loser')) {
+		if ($this->parent && get_class($this->parent) == 'Loser') {
 			$rate = $this->parent->success_rate() / 2;
 		} else {
 			$rate = 0.02;
