@@ -14,17 +14,31 @@ function start(callable $first_function, array $args=[])
 class MaybeMonad
 {
 	private $callables = [];
-		
+
 	public function andThen(callable $next_function, array $extra_params=[])
 	{
-		// implement me!
-		throw new BadMethodCallException('implement this method');
+		$this->callables[] = array(
+			'function' => $next_function,
+			'params'   => $extra_params,
+			);
+
+		return $this;
 	}
 	
 	public function resolve()
 	{
-		// implement me!
-		throw new BadMethodCallException('implement this method');
+		$result = null;
+		foreach($this->callables as $callable) {
+			if (!is_null($result)) {
+				array_unshift($callable['params'], $result);
+			}
+			$result = call_user_func_array($callable['function'], $callable['params']);
+			if (is_null($result)) {
+				throw new UnexpectedValueException();
+			}
+		}
+
+		return $result;
 	}
 }
 
@@ -78,13 +92,12 @@ class MaybeComprehension
 	*/
 	public function _maybe_resolve()
 	{
-		// implement me!
-		throw new BadMethodCallException('implement this method');
+		return $this->monad->resolve();
 	}
 	
 	public function __call($name, $args)
 	{
-		// implement me!
-		throw new BadMethodCallException('implement this method');
+		$this->monad = $this->monad->andThen([$this->target_object, $name], $args);
+		return $this;
 	}
 }

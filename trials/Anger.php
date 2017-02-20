@@ -179,12 +179,11 @@ class Anger
 			return $calculator->add(5, $argument);
 		};
 
-
-		assert_that($add_five_to_argument(10))->is_identical_to(__);
-		assert_that($add_five_to_argument(10), new SimpleCalculator())->is_identical_to(__);
+		assert_that($add_five_to_argument(10))->is_identical_to(15);
+		assert_that($add_five_to_argument(10), new SimpleCalculator())->is_identical_to(15);
 
 		// try removing the "= null" default value assignment and see what happens
-		assert_that($add_five_to_argument(10), null)->is_identical_to(__);
+		assert_that($add_five_to_argument(10), null)->is_identical_to(15);
 	}
 	
 	private function how_many_arguments()
@@ -195,8 +194,8 @@ class Anger
 	
 	public function functions_can_reflect_on_their_arguments_as_arrays()
 	{
-		assert_that($this->how_many_arguments(1))->is_identical_to(__);
-		assert_that($this->how_many_arguments(100, 200, 150))->is_identical_to(__);
+		assert_that($this->how_many_arguments(1))->is_identical_to(1);
+		assert_that($this->how_many_arguments(100, 200, 150))->is_identical_to(3);
 	}
 	
 	public function functions_can_be_invoked_via_call_user_func()
@@ -206,8 +205,8 @@ class Anger
 		$call_user_func_result = call_user_func($how_many, 10, 50);
 		$call_user_func_array_result = call_user_func_array($how_many, [100, 200, 150]);
 		
-		assert_that($call_user_func_result)->is_identical_to(__);
-		assert_that($call_user_func_array_result)->is_identical_to(__);
+		assert_that($call_user_func_result)->is_identical_to(2);
+		assert_that($call_user_func_array_result)->is_identical_to(3);
 	}
 
 	/**
@@ -229,7 +228,7 @@ class Anger
 	public function phpdoc_in_comments_is_a_standard_way_of_documenting_methods()
 	{
 		assert_that($this->concatenate_string('The primes less than 10 are ', [2, 3, 5, 7], ', ', '.'))
-			->is_identical_to(__);
+			->is_identical_to('The primes less than 10 are 2, 3, 5, 7.');
 
 		// Virgil says: Making it this far down into the Inferno really has been tough! Although I
 		// totally did it once before. Anyway, this PHPDoc really helped me find my way. Leaving
@@ -242,7 +241,17 @@ class Anger
 		$concatenate_string = $anger_class->getMethod('concatenate_string');
 		$doc_comment = $concatenate_string->getDocComment();
 
-		assert_that($doc_comment)->contains_string(__);
+		assert_that($doc_comment)->contains_string('/**
+	* Concatenate the values of an array together, like implode(), but with
+	* a specified prefix and suffix.
+	* @param string $prefix the first result
+	* @param array $values the values to concatenate together
+	* @param string $separator the separator
+	* @param string|void $suffix the suffix of the value. Defaults to an empty string.
+	* @return string the concatenated string.
+	* @author FArgenti
+	* @since 1.0.2
+	*/');
 		// Virgil says: Because comments are relatively expensive to retrieve at runtime
 		// in PHP, it's important to have some amount of intelligent caching built-in,
 		// so consider using a 3rd party library to take care of this for you.
