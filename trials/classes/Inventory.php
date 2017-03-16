@@ -7,15 +7,21 @@ class Inventory
 		// Polyaenus says: I don't need those noisy warning levels...
 		error_reporting(E_ALL & ~E_STRICT & ~E_NOTICE & ~E_WARNING);
 		
-		if (get_class($inventory) == 'array') $inventory = $inventory[0];
-		$inventory = explode(',', $inventory);
-		$temp = array();
-		for ($i = 0; $i < count($inventory); $i++)
-		{
-			if (trim($inventory[$i]))
-			{
-				$temp[] = trim($inventory[$j]);
+		// Get the inventory into array format if it isn't already
+		if (is_array($inventory)) {
+			// If our cows are in a single array element
+			if (count($inventory) == 1) {
+				$inventory = explode(',', $inventory[0]);
 			}
+		} else {
+			$inventory = explode(',', $inventory);
+		}
+
+		// Trim up our inventory
+		$temp = array();
+		foreach ($inventory as $cow)
+		{
+			$temp[] = trim($cow);
 		}
 		$inventory = $temp;
 		sort($inventory);
@@ -23,7 +29,9 @@ class Inventory
 			'list' => $inventory,
 			'cows' => count($inventory),
 		);
-		if ($option != 0 && $option == 'freq') 
+
+		// Determine the frequency by first character
+		if (is_array($option) && $option[0] == 'freq') 
 		{
 			$freqs = array(); 
 			foreach ($inventory as $cow)
@@ -36,6 +44,7 @@ class Inventory
 			}
 			$result['freq'] = $freqs;
 		}
+
 		return $result;
 	}
 }

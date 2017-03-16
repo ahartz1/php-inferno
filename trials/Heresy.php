@@ -10,26 +10,26 @@ class Heresy
 
 	public function null_is_converted_to_empty_string_for_lexical_comparison()
 	{
-		assert_that("" == null)->is_identical_to(__);
+		assert_that("" == null)->is_identical_to(true);
 	}
 
 	public function strings_that_evaluate_to_any_value_of_zero_are_equal_to_each_other_and_zero()
 	{
-		assert_that(0 == "0")->is_identical_to(__);
-		assert_that("0" == "0.0")->is_identical_to(__);
-		assert_that("0" == "00")->is_identical_to(__);
+		assert_that(0 == "0")->is_identical_to(true);
+		assert_that("0" == "0.0")->is_identical_to(true);
+		assert_that("0" == "00")->is_identical_to(true);
 	}
 
 	public function strings_that_evaluate_to_the_digit_zero_are_falsey()
 	{
 		$test = (bool) "0";
-		assert_that($test)->is_identical_to(__);
+		assert_that($test)->is_identical_to(false);
 	}
 
 	public function strings_that_evaluate_to_a_value_of_zero_that_is_not_the_digit_zero_are_truthy()
 	{
 		$test = (bool) "0.0";
-		assert_that($test)->is_identical_to(__);
+		assert_that($test)->is_identical_to(true);
 	}
 
 	public function strings_are_converted_to_numbers_when_compared_or_added_to_numbers()
@@ -38,10 +38,10 @@ class Heresy
 		$second = 10 + "Cavalcante";
 		$third = 11 + "6th circle";
 
-		assert_that($first)->is_identical_to(__);
-		assert_that($second)->is_identical_to(__);
-		assert_that($third)->is_identical_to(__);
-		assert_that('Cavaltante' == 0)->is_identical_to(__);
+		assert_that($first)->is_identical_to(14);
+		assert_that($second)->is_identical_to(10);
+		assert_that($third)->is_identical_to(17);
+		assert_that('Cavaltante' == 0)->is_identical_to(true);
 
 		// Virgil says: PHP's odd string to number conversion didn't come out of thin air.
 		// It is based on a Unix function written a while back. What's odd may not be the
@@ -57,21 +57,21 @@ class Heresy
 		$a = 100;
 		$a[0] = 'Cavalcante';
 
-		assert_that($a)->is_identical_to(__);
+		assert_that($a)->is_identical_to(100);
 	}
 
 	public function strings_that_are_referenced_as_arrays_will_not_be_manipulated_the_way_you_expect()
 	{
 		$a = 'Farinata';
 		$a[0] = 'Cavalcante';
-		assert_that($a)->is_identical_to(__);
+		assert_that($a)->is_identical_to('Carinata');
 	}
 
 	public function floats_are_not_precise_and_should_not_be_compared_for_equality()
 	{
 		$value = floor((0.1 + 0.7) * 10);
 
-		assert_that($value)->is_identical_to(__);
+		assert_that($value)->is_identical_to(7.0);
 
 		// Virgil says: This is actually a problem in any language that uses a binary value to store
 		// decimal values without arbitrary precision (including Java, Python, Ruby and many others):
@@ -84,14 +84,14 @@ class Heresy
 		$string2 = 'abcd';
 		$string3 = 'abc';
 
-		assert_that($string1 == $string3)->is_identical_to(__);
-		assert_that($string1 === $string3)->is_identical_to(__);
-		assert_that($string1 < $string2)->is_identical_to(__);
+		assert_that($string1 == $string3)->is_identical_to(true);
+		assert_that($string1 === $string3)->is_identical_to(true);
+		assert_that($string1 < $string2)->is_identical_to(true);
 
 		$strings = [$string2, $string3, $string1];
 		sort($strings);
 
-		assert_that($strings)->is_identical_to(__);
+		assert_that($strings)->is_identical_to([$string3, $string1, $string2]);
 	}
 
 	public function numbers_are_compared_through_normal_math()
@@ -100,24 +100,24 @@ class Heresy
 		$number2 = 3.3;
 		$number3 = 1.0;
 
-		assert_that($number1 == $number3)->is_identical_to(__);
-		assert_that($number1 === $number3)->is_identical_to(__);
-		assert_that($number1 < $number2)->is_identical_to(__);
+		assert_that($number1 == $number3)->is_identical_to(true);
+		assert_that($number1 === $number3)->is_identical_to(false);
+		assert_that($number1 < $number2)->is_identical_to(true);
 
 		$numbers = [$number1, $number2, $number3];
 		sort($numbers);
 
-		assert_that($numbers)->is_identical_to(__);
+		assert_that($numbers)->is_identical_to([$number1, $number3, $number2]);
 	}
 
 	public function comparisons_with_NAN_are_always_false()
 	{
 		$number1 = 10;
 
-		assert_that($number1 == NAN)->is_identical_to(__);
-		assert_that($number1 > NAN)->is_identical_to(__);
-		assert_that($number1 < NAN)->is_identical_to(__);
-		assert_that(NAN == NAN)->is_identical_to(__);
+		assert_that($number1 == NAN)->is_identical_to(false);
+		assert_that($number1 > NAN)->is_identical_to(false);
+		assert_that($number1 < NAN)->is_identical_to(false);
+		assert_that(NAN == NAN)->is_identical_to(false);
 	}
 
 	public function strings_that_represent_numbers_are_compared_like_numbers()
@@ -126,9 +126,9 @@ class Heresy
 		$numeric2 = '124';
 		$numeric3 = '0124';
 
-		assert_that($numeric1 == '123')->is_identical_to(__);
-		assert_that($numeric2 > $numeric1)->is_identical_to(__);
-		assert_that($numeric3 > $numeric1)->is_identical_to(__);
+		assert_that($numeric1 == '123')->is_identical_to(true);
+		assert_that($numeric2 > $numeric1)->is_identical_to(true);
+		assert_that($numeric3 > $numeric1)->is_identical_to(true);
 
 		// Virgil says: the ways you can combine type interpolation and the comparison operators
 		// are virtually endless. It's safe to say that the simplicity afforded by weak typing
@@ -142,13 +142,13 @@ class Heresy
 		$object1 = new ClassWithProperties();
 		$object2 = new ClassWithProperties();
 
-		assert_that($object1 == $object2)->is_identical_to(__);
-		assert_that($object1 === $object2)->is_identical_to(__);
+		assert_that($object1 == $object2)->is_identical_to(true);
+		assert_that($object1 === $object2)->is_identical_to(false);
 
 		$object2->property_one = 'bye';
 
-		assert_that($object1 == $object2)->is_identical_to(__);
-		assert_that($object1 === $object2)->is_identical_to(__);
+		assert_that($object1 == $object2)->is_identical_to(false);
+		assert_that($object1 === $object2)->is_identical_to(false);
 	}
 
 	public function object_containment_in_an_array_is_determined_by_equality_of_properties()
@@ -158,7 +158,7 @@ class Heresy
 
 		$array = [$object1];
 
-		assert_that(in_array($object2, $array))->is_identical_to(__);
+		assert_that(in_array($object2, $array))->is_identical_to(true);
 	}
 
 	public function object_containment_in_an_array_of_strings_determined_by_result_of__toString()
@@ -168,11 +168,11 @@ class Heresy
 
 		$array1 = [$object1];
 
-		assert_that(in_array('wello!', $array1))->is_identical_to(__);
+		assert_that(in_array('wello!', $array1))->is_identical_to(true);
 
 		$array2 = ['wello!'];
 
-		assert_that(in_array($object1, $array2))->is_identical_to(__);
+		assert_that(in_array($object1, $array2))->is_identical_to(true);
 
 		// Virgil says: For this reason, adding __toString to objects is a non-trivial
 		// change to the functionality of your code. Be careful to understand the implications
