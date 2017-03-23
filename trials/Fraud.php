@@ -23,9 +23,9 @@ class Fraud
 
 		}
 
-		assert_that(count($array))->is_identical_to(__);
-		assert_that(get_class($e))->is_identical_to(__);
-		assert_that($e->getMessage())->contains_string(__);
+		assert_that(count($array))->is_identical_to(3);
+		assert_that(get_class($e))->is_identical_to(RuntimeException);
+		assert_that($e->getMessage())->contains_string('Index invalid or out of range');
 
 	}
 
@@ -41,25 +41,25 @@ class Fraud
 
 		}
 
-		assert_that(isset($result))->is_identical_to(__);
-		assert_that($e->getMessage())->contains_string(__);
+		assert_that(isset($result))->is_identical_to(false);
+		assert_that($e->getMessage())->contains_string('Index invalid or out of range');
 	}
 
 	public function spl_min_and_max_heaps_are_available_to_do_sort_operations()
 	{
-		$max_heap = new SplMinHeap();
-		$max_heap->insert(5);
-		$max_heap->insert(10);
-		$max_heap->insert(2);
-		$max_heap->insert(20);
+		$min_heap = new SplMinHeap();
+		$min_heap->insert(5);
+		$min_heap->insert(10);
+		$min_heap->insert(2);
+		$min_heap->insert(20);
 
 		$result = [];
-		foreach($max_heap as $value)
+		foreach($min_heap as $value)
 		{
 			$result[] = $value;
 		}
 
-		assert_that($result)->is_identical_to(__);
+		assert_that($result)->is_identical_to([2, 5, 10, 20]);
 	}
 
 	public function spl_object_storage_can_be_used_like_a_set()
@@ -71,7 +71,7 @@ class Fraud
 		$spl_storage->attach($an_object);
 		$spl_storage->attach($an_object);
 
-		assert_that(count($spl_storage))->is_identical_to(__);
+		assert_that(count($spl_storage))->is_identical_to(1);
 	}
 
 	public function spl_priority_queue_is_useful_for_custom_priorities()
@@ -89,7 +89,7 @@ class Fraud
 			$result[] = $value;
 		}
 
-		assert_that(implode($result))->is_identical_to(__);
+		assert_that(implode($result))->is_identical_to('Simon');
 	}
 
 	public function classes_that_implement_countable_get_the_count_function_for_free()
@@ -99,7 +99,7 @@ class Fraud
 		$credit_rating = new CreditRating();
 		$credit_rating->set_credit_rating('AAA');
 
-		assert_that(count($credit_rating))->is_identical_to(__);
+		assert_that(count($credit_rating))->is_identical_to(3);
 	}
 
 	public function classes_that_implement_traversable_can_be_iterated_over()
@@ -114,7 +114,7 @@ class Fraud
 		{
 			$result[] = $char;
 		}
-		assert_that($result)->is_identical_to(__);
+		assert_that($result)->is_identical_to(['G', 'u', 'i', 'd', 'o']);
 	}
 
 	public function the_filter_iterator_allows_callbacks_to_remove_entries()
@@ -129,7 +129,7 @@ class Fraud
 		{
 			$result[] = $char;
 		}
-		assert_that($result)->is_identical_to(__);
+		assert_that($result)->is_identical_to(['u', 'o']);
 	}
 
 	public function regex_iterator_filters_by_regex()
@@ -145,7 +145,7 @@ class Fraud
 			$results[] = $person;
 		}
 
-		assert_that($results)->is_identical_to(__);
+		assert_that($results)->is_identical_to(['Pope Boniface', 'Pope Clement']);
 	}
 
 	public function the_append_iterator_lets_you_combine_multiple_iterators_together()
@@ -159,7 +159,7 @@ class Fraud
 		{
 			$result[] = $char;
 		}
-		assert_that(implode($result))->is_identical_to(__);
+		assert_that(implode($result))->is_identical_to('CiampoloCaiaphas');
 
 		// Virgil says: there are many more built-in iterators than this one, including
 		// CachingIterator, InfiniteIterator, FilesystemIterator and others.
@@ -180,10 +180,10 @@ class Fraud
 		};
 		spl_autoload_register($loading_function);
 
-		assert_that(class_exists('Manto'))->is_identical_to(__);
+		assert_that(class_exists('Manto'))->is_identical_to(true);
 
 		$manto = new Manto();
-		assert_that($manto->daugher_of())->is_identical_to(__);
+		assert_that($manto->daugher_of())->is_identical_to('Tiresias');
 	}
 
 	public function objects_that_implement_the_JsonSerializable_interface_have_a_custom_json_encode()
@@ -191,7 +191,6 @@ class Fraud
 		// NumberRange is defined in classes/SPLClasses.php
 
 		$number_range = new NumberRange(1, 10);
-		assert_that(json_encode($number_range))->is_identical_to(__);
+		assert_that(json_encode($number_range))->is_identical_to("[1,2,3,4,5,6,7,8,9,10]");
 	}
-
 }
