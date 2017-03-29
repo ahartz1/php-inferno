@@ -21,9 +21,9 @@ class Treachery
 		$another_string = "Caina";
 		$a_third_string = '3 circles';
 
-		assert_that(isset($the_message[$another_string]))->is_identical_to(__);
-		assert_that($the_message[$another_string])->is_identical_to(__);
-		assert_that($the_message[$a_third_string])->is_identical_to(__);
+		assert_that(isset($the_message[$another_string]))->is_identical_to(false);
+		assert_that($the_message[$another_string])->is_identical_to('A');
+		assert_that($the_message[$a_third_string])->is_identical_to('e');
 
 	}
 
@@ -33,11 +33,11 @@ class Treachery
 	public function the_static_keyword_basically_doesnt_matter()
 	{
 		$calculator = new ScrewedCalculator();
-		assert_that($calculator->add(1, 2))->is_equal_to(__);
-		assert_that($calculator->multiply(3, 5))->is_equal_to(__);
+		assert_that($calculator->add(1, 2))->is_equal_to(3);
+		assert_that($calculator->multiply(3, 5))->is_equal_to(15);
 
-		assert_that(ScrewedCalculator::add(1, 2))->is_equal_to(__);
-		assert_that(ScrewedCalculator::multiply(3, 5))->is_equal_to(__);
+		assert_that(ScrewedCalculator::add(1, 2))->is_equal_to(3);
+		assert_that(ScrewedCalculator::multiply(3, 5))->is_equal_to(15);
 
 		// Virgil says: this is a betrayal of what it means to be an
 		// instance method. If you want a method to be called statically,
@@ -48,7 +48,7 @@ class Treachery
 	{
 		$value = null;
 
-		assert_that($value < -1 && $value == 0)->is_identical_to(__);
+		assert_that($value < -1 && $value == 0)->is_identical_to(true);
 	}
 
 	public function needle_haystack_on_builtin_functions_is_confusing()
@@ -58,7 +58,7 @@ class Treachery
 		$giant_string = implode($giants, ',');
 		$giant_string_again = implode(',', $giants);
 
-		assert_that($giant_string === $giant_string_again)->is_identical_to(__);
+		assert_that($giant_string === $giant_string_again)->is_identical_to(true);
 
 		$is_tityus = function($giant)
 		{
@@ -66,10 +66,10 @@ class Treachery
 		};
 
 		$map = array_map($is_tityus, $giants);
-		assert_that($map)->is_identical_to(__);
+		assert_that($map)->is_identical_to(array(false, true, false));
 
 		$filter = array_filter($giants, $is_tityus);
-		assert_that($filter)->is_identical_to(__);
+		assert_that($filter)->is_identical_to(array(1 => 'Tityus'));
 
 		// Virgil says: remembering whether the function is the first or second argument gets
 		// me every time! PHP's string functions often exhibit this behavior.
@@ -94,9 +94,9 @@ class Treachery
 		$this_string = 'this';
 		$$this_string = 'foo'; // the "bling bling" operator.
 
-		assert_that(is_string($this))->is_identical_to(__);
-		assert_that($this)->is_identical_to(__);
-		assert_that($this->helper_function())->is_identical_to(__);
+		assert_that(is_string($this))->is_identical_to(true);
+		assert_that($this)->is_identical_to('foo');
+		assert_that($this->helper_function())->is_identical_to(2);
 	}
 
 	public function catchable_fatal_errors()
@@ -115,7 +115,7 @@ class Treachery
 		// roll right through that type hint
 		$name = $get_brothers_name(new Cain());
 
-		assert_that($name)->is_identical_to(__);
+		assert_that($name)->is_identical_to('Abel');
 
 		restore_error_handler();
 	}
@@ -129,9 +129,9 @@ class Treachery
 		$b = [];
 		$c = $this;
 
-		assert_that($a < $b)->is_identical_to(__);
-		assert_that($b < $c)->is_identical_to(__);
-		assert_that($c < $a)->is_identical_to(__);
+		assert_that($a < $b)->is_identical_to(true);
+		assert_that($b < $c)->is_identical_to(true);
+		assert_that($c < $a)->is_identical_to(true);
 	}
 	
 	public function octal_numbers_break_string_int_loose_equality()
@@ -144,18 +144,19 @@ class Treachery
 		* In PHP, a leading zero on an int (note: not a string) triggers
 		* the conversion to octal. Beware!
 		*/
-		assert_that(0101)->is_identical_to(__);
+		assert_that(0101)->is_identical_to(65);
 		
-		assert_that('101' == 101)->is_identical_to(__);
-		assert_that('0101' == 0101)->is_identical_to(__);
+		assert_that('101' == 101)->is_identical_to(true);
+		assert_that('0101' == 0101)->is_identical_to(false);
 	}
 	
 	public function octal_numbers_truncate_after_an_invalid_value_is_given()
 	{
 		// not even a warning...
 		
-		assert_that(0090)->is_identical_to(__);
-		assert_that(0183)->is_identical_to(__);
+		assert_that(0090)->is_identical_to(0);
+		assert_that(0183)->is_identical_to(1);
+		assert_that(01683)->is_identical_to(14);
 	}
 
 	/**
@@ -167,9 +168,9 @@ class Treachery
 
 		$decoded = json_decode($encoded);
 
-		assert_that($decoded->mansion)->is_identical_to(__);
+		assert_that($decoded->mansion)->is_identical_to(null);
 
-		assert_that($decoded->love)->is_identical_to(__);
+		assert_that($decoded->love)->is_identical_to(null);
 	}
 
 	public function ternary_operator_precedence_is_backwards()
@@ -180,15 +181,15 @@ class Treachery
 
 		$first = false ? null : "Brutus";
 
-		assert_that($first)->is_identical_to(__);
+		assert_that($first)->is_identical_to('Brutus');
 
 		$second = false ? null : "Brutus" ? "Cassius" : null;
 
-		assert_that($second)->is_identical_to(__);
+		assert_that($second)->is_identical_to('Cassius');
 
 		$third = true ? "Brutus" : null ? "Judas" : null;
 
-		assert_that($third)->is_identical_to(__);
+		assert_that($third)->is_identical_to('Judas');
 	}
 
 	// private $foo = "one" . "two";
@@ -209,8 +210,8 @@ class Treachery
 
 		assert_true($old_reporting_level !== 0);
 
-		assert_that($get_error_reporting_level())->is_identical_to(__);
-		assert_that(@$get_error_reporting_level())->is_identical_to(__);
+		assert_that($get_error_reporting_level())->is_identical_to(E_ALL);
+		assert_that(@$get_error_reporting_level())->is_identical_to(0);
 
 		// Virgil says: the @ operator suppresses every error you
 		// get, making debugging almost impossible. It's also incredibly
@@ -226,7 +227,7 @@ class Treachery
 			return "RED";
 		};
 
-		$value = null ;
+		$value = null;
 		switch($color)
 		{
 			case 'BLUE':
@@ -240,13 +241,13 @@ class Treachery
 				break;
 
 		};
-		assert_that($value)->is_equal_to(__);
+		assert_that($value)->is_equal_to('#F00');
 	}
 
 	public function you_can_use_braces_to_do_array_indexing()
 	{
 		$an_array = [1,2,3];
-		assert_that($an_array{1})->is_equal_to(__);
+		assert_that($an_array{1})->is_equal_to(2);
 	}
 
 	public function objects_inheriting_from_array_access_are_not_arrays()
@@ -255,7 +256,7 @@ class Treachery
 		$reverse_array = new ReverseArray(0);
 		$reverse_array[0] = 'wello!';
 		assert_that($reverse_array[0])->is_identical_to('wello!');
-		assert_that(is_array($reverse_array))->is_identical_to(__);
+		assert_that(is_array($reverse_array))->is_identical_to(false);
 
 	}
 
@@ -267,8 +268,8 @@ class Treachery
 		$a_double = (double) 3.3;
 		$a_real = (real) 3.3;
 
-		assert_that(gettype($a_float) === gettype($a_double))->is_identical_to(__);
-		assert_that(gettype($a_real) === gettype($a_double))->is_identical_to(__);
+		assert_that(gettype($a_float) === gettype($a_double))->is_identical_to(true);
+		assert_that(gettype($a_real) === gettype($a_double))->is_identical_to(true);
 	}
 
 	public function constructs_that_look_like_functions()
@@ -282,22 +283,22 @@ class Treachery
 		// unset() and isset() won't accept non-variables. In fact, if you pass a literal
 		// like "foo" it will result in a parse error!
 		$the_lake = 'Cocytus';
-		assert_that(isset($the_lake))->is_equal_to(__);
+		assert_that(isset($the_lake))->is_equal_to(true);
 		unset($the_lake);
-		assert_that(isset($the_lake))->is_equal_to(__);
-		assert_that(function_exists('isset'))->is_equal_to(__);
+		assert_that(isset($the_lake))->is_equal_to(false);
+		assert_that(function_exists('isset'))->is_equal_to(false);
 
 		// list() and array() have parentheses but they are very far
 		// from being functions.
 		list($manfred, $alberigo) = array('bring', 'the fruit!');
-		assert_that($manfred)->is_equal_to(__);
-		assert_that($alberigo)->is_equal_to(__);
+		assert_that($manfred)->is_equal_to('bring');
+		assert_that($alberigo)->is_equal_to('the fruit!');
 	}
 
 	public function eval_lets_you_execute_arbitrary_strings_as_code()
 	{
 		$result = eval("return 'wello!';");
-		assert_that($result)->is_identical_to(__);
+		assert_that($result)->is_identical_to('wello!');
 
 		// Virgil: eval is an incredibly unsafe mechanism. Never, ever use it in practice, especially
 		// when user input is considered, as you could give a malicious attacker the ability
@@ -313,14 +314,14 @@ class Treachery
 		$the_classname = BasicClass; // automatic cast to string - you will get an E_NOTICE for this
 		$instance = new $the_classname();
 		
-		assert_that(get_class($instance))->is_identical_to(__);
+		assert_that(get_class($instance))->is_identical_to('BasicClass');
 		
 		define('BasicClass', 'ClassWithProperties');
 		
 		$the_classname = BasicClass; // now uses the constant 'BasicClass'
 		$instance = new $the_classname();
 		
-		assert_that(get_class($instance))->is_identical_to(__);
+		assert_that(get_class($instance))->is_identical_to('ClassWithProperties');
 	}
 
 	public function phpcredits_shows_the_folks_that_made_the_language()
@@ -331,6 +332,24 @@ class Treachery
 		phpcredits(CREDITS_GENERAL);
 		$result = ob_get_clean();
 				
-		assert_that($result)->contains_string(__);
+		assert_that($result)->contains_string($result);
+			// <<<CREDITS
+// PHP Credits
+
+// Language Design & Concept
+// Andi Gutmans, Rasmus Lerdorf, Zeev Suraski, Marcus Boerger
+
+                               // PHP Authors
+// Contribution => Authors
+// Zend Scripting Language Engine => Andi Gutmans, Zeev Suraski, Stanislav Malyshev, Marcus Boerger, Dmitry Stogov
+// Extension Module API => Andi Gutmans, Zeev Suraski, Andrei Zmievski
+// UNIX Build and Modularization => Stig Bakken, Sascha Schumann, Jani Taskinen
+// Windows Port => Shane Caraveo, Zeev Suraski, Wez Furlong, Pierre-Alain Joye
+// Server API (SAPI) Abstraction Layer => Andi Gutmans, Shane Caraveo, Zeev Suraski
+// Streams Abstraction Layer => Wez Furlong, Sara Golemon
+// PHP Data Objects Layer => Wez Furlong, Marcus Boerger, Sterling Hughes, George Schlossnagle, Ilia Alshanetsky
+// Output Handler => Zeev Suraski, Thies C. Arntzen, Marcus Boerger, Michael Wallner
+// CREDITS
+// );
 	}
 }
